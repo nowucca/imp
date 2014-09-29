@@ -7,20 +7,19 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>com.nowucca.imp.server</name>
+  <name>com.nowucca.imp.proxy</name>
   <url>http://maven.apache.org</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <port>8080</port>
     <host>localhost</host>
-    <uriManager>com.nowucca.imp.core.basic.BasicURIManager</uriManager>
   </properties>
 
   <profiles>
     <profile>
       <id>server</id>
-      <activation><property><name>server</name></property></activation>
+      <activation><property><name>proxy</name></property></activation>
       <build>
         <plugins>
           <plugin>
@@ -35,7 +34,7 @@
               </execution>
             </executions>
             <configuration>
-              <mainClass>com.nowucca.imp.server.ShurlyServer</mainClass>
+              <mainClass>com.nowucca.imp.proxy.ImpServer</mainClass>
               <arguments>
                 <argument>${port}</argument>
                 <argument>${uriManager}</argument>
@@ -62,7 +61,7 @@
               </execution>
             </executions>
             <configuration>
-              <mainClass>com.nowucca.imp.server.ShurlyClient</mainClass>
+              <mainClass>com.nowucca.imp.proxy.ShurlyClient</mainClass>
               <arguments>
                 <argument>${host}</argument>
                 <argument>${port}</argument>
@@ -85,8 +84,19 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty-all</artifactId>
-      <version>4.0.21.Final</version>
+      <version>4.0.23.Final</version>
       <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.0.2</version>
     </dependency>
 
     <dependency>

@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2012-2014, Steven Atkinson. All rights reserved.
  */
-package com.nowucca.shurly.util;
+package com.nowucca.imp.util;
 
 import java.nio.charset.Charset;
 
