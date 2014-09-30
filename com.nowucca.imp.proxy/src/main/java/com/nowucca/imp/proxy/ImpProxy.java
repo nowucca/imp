@@ -10,15 +10,25 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import java.util.Collection;
 
 public class ImpProxy {
 
-    static final int LOCAL_PORT = Integer.parseInt(System.getProperty("localPort", "8443"));
-    static final String REMOTE_HOST = System.getProperty("remoteHost", "www.google.com");
-    static final int REMOTE_PORT = Integer.parseInt(System.getProperty("remotePort", "443"));
+    static final int LOCAL_PORT = Integer.parseInt(System.getProperty("localPort", "8080"));
+    static final String REMOTE_HOST = System.getProperty("remoteHost", "www.cnn.com");
+    static final int REMOTE_PORT = Integer.parseInt(System.getProperty("remotePort", "80"));
 
     public static void main(String[] args) throws Exception {
-        System.err.println("Proxying *:" + LOCAL_PORT + " to " + REMOTE_HOST + ':' + REMOTE_PORT + " ...");
+        new ImpProxy().run();
+    }
+
+    public ImpProxy() {
+    }
+
+    public void run() throws Exception {
+        final long start = System.currentTimeMillis();
+
+        printWelcomeMessage();
 
         // Configure the bootstrap.
         final EventLoopGroup bossGroup = new NioEventLoopGroup(1);
@@ -26,14 +36,23 @@ public class ImpProxy {
         try {
             final ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
-             .channel(NioServerSocketChannel.class)
-             .handler(new LoggingHandler(LogLevel.INFO))
-             .childHandler(new ImpProxyInitializer(REMOTE_HOST, REMOTE_PORT))
-             .childOption(ChannelOption.AUTO_READ, false)
-             .bind(LOCAL_PORT).sync().channel().closeFuture().sync();
+                    .channel(NioServerSocketChannel.class)
+                    .handler(new LoggingHandler(LogLevel.INFO))
+                    .childHandler(new ImpProxyInitializer(REMOTE_HOST, REMOTE_PORT))
+                    .childOption(ChannelOption.AUTO_READ, false);
+
+            System.out.format("Started in %3.3f seconds.\n", (System.currentTimeMillis() - start) / 1000f);
+
+            b.bind(LOCAL_PORT).sync().channel().closeFuture().sync();
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
+    }
+
+    private void printWelcomeMessage() {
+        System.out.format("Imp Server (c) 2014 Steven Atkinson.  All Rights Reserved.\n\n");
+        System.out.println("Proxying *:" + LOCAL_PORT + " to " + REMOTE_HOST + ':' + REMOTE_PORT + " ...");
+        System.out.println();
     }
 }
