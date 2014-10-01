@@ -5,9 +5,8 @@ package com.nowucca.imp.core;
 
 /**
  */
-public class ImpConfig {
+public final class ImpConfig {
 
-    public static void main(String[] args) {
-        System.out.println("hello");
+    private ImpConfig() {
     }
 }

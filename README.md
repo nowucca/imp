@@ -10,9 +10,16 @@ Milestone 1: Stand up a TCP proxy with configuration files.
 * establish testing regime that uses 2 robot scripts and the proxy
 
 Milestone 2: Implement an IMAP codec using Netty 4.x with unit tests.
-* model all commands/messages using apache-james as a guide
-* implement encoder and decoder with unit tests for each command/message
+Codec for Client requests
+* model all commands using apache-james as a guide
+* implement encoder and decoder with unit tests for each command
 * install codecs in accept and connect pipelines
+
+Codec for Server responses
+* model all responses using apache-james as a guide
+* implement encoder and decoder with unit tests for each response
+* install codecs in accept and connect pipelines
+
 * replay the testing regime from milestone 1 with new codecs installed.
 
 Usage
