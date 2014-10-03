@@ -12,9 +12,8 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.DecoderResult;
 import io.netty.handler.codec.TooLongFrameException;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
+import java.util.List;
+import javax.mail.Flags;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -109,10 +108,41 @@ public class ImapRequestDecoderTest {
     @Test
     public void shouldParseSimpleAppendCommand() throws Exception {
         writeToChannel("A010 APPEND saved-messages (\\Seen) {310}\r\n");
+
         final ByteBuf expected = Unpooled.wrappedBuffer(ImapRequestDecoder.CONTINUATION_BYTES);
         final ByteBuf buffer = (ByteBuf) channel.readOutbound();
-
         assertByteBufsEqual(expected, buffer);
+
+        writeToChannel("Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)\r\n");
+        writeToChannel("From: Fred Foobar <foobar@Blurdybloop.COM>\r\n");
+        writeToChannel("Subject: afternoon meeting\r\n");
+        writeToChannel("To: mooch@owatagu.siam.edu\r\n");
+        writeToChannel("Message-Id: <B27397-0100000@Blurdybloop.COM>\r\n");
+        writeToChannel("MIME-Version: 1.0\r\n");
+        writeToChannel("Content-Type: TEXT/PLAIN; CHARSET=US-ASCII\r\n");
+        writeToChannel("\r\n");
+        writeToChannel("Hello Joe, do you think we can meet at 3:30 tomorrow?\r\n");
+        writeToChannel("\r\n");
+
+        final ImapRequest appendRequest = expectSuccessfulRequest("A010", "APPEND");
+        final List<?> arguments = appendRequest.getCommand().getArguments();
+        assertEquals(4, arguments.size());
+
+
+        assertThat(arguments.get(0), instanceOf(String.class));
+        assertThat("saved-messages", equalTo(arguments.get(0)));
+
+        assertThat(arguments.get(1), instanceOf(Flags.class));
+        final Flags flags = (Flags) arguments.get(1);
+        assertTrue(flags.contains(Flags.Flag.SEEN));
+        assertEquals(1, flags.getSystemFlags().length);
+        assertEquals(0, flags.getUserFlags().length);
+
+        // no date-time
+        assertNull(arguments.get(2));
+
+        assertThat(arguments.get(3), instanceOf(ByteBuf.class));
+        assertEquals(310, ((ByteBuf) arguments.get(3)).readableBytes());
     }
 
     private void assertByteBufsEqual(ByteBuf expected, ByteBuf buffer) {
@@ -127,12 +157,13 @@ public class ImapRequestDecoderTest {
         channel.writeInbound(buf);
     }
 
-    private void expectSuccessfulRequest(String tag, String commandName) {
+    private ImapRequest expectSuccessfulRequest(String tag, String commandName) {
         final ImapRequest imapRequest = (ImapRequest) channel.readInbound();
         assertNotNull(imapRequest);
         assertEquals(tag, imapRequest.getTag());
         assertNotNull(imapRequest.getCommand());
         assertEquals(commandName.toUpperCase(), imapRequest.getCommand().getCommandName());
+        return imapRequest;
     }
 
     private void expectInvalidRequest(Class<?> exceptionClass) {
