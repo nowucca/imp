@@ -7,6 +7,8 @@ import com.nowucca.imp.core.message.command.ImapRequest;
 import com.nowucca.imp.core.message.command.InvalidImapRequest;
 import com.nowucca.imp.util.UTF8;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.DecoderResult;
 import io.netty.handler.codec.TooLongFrameException;
@@ -14,9 +16,11 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import static io.netty.buffer.Unpooled.directBuffer;
+import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
@@ -102,6 +106,20 @@ public class ImapRequestDecoderTest {
         expectInvalidRequest(IllegalArgumentException.class);
     }
 
+    @Test
+    public void shouldParseSimpleAppendCommand() throws Exception {
+        writeToChannel("A010 APPEND saved-messages (\\Seen) {310}\r\n");
+        final ByteBuf expected = Unpooled.wrappedBuffer(ImapRequestDecoder.CONTINUATION_BYTES);
+        final ByteBuf buffer = (ByteBuf) channel.readOutbound();
+
+        assertByteBufsEqual(expected, buffer);
+    }
+
+    private void assertByteBufsEqual(ByteBuf expected, ByteBuf buffer) {
+        Assert.assertTrue(format("Expected bytes '%s'\nreceived:\n               '%s'",
+                        ByteBufUtil.hexDump(expected), ByteBufUtil.hexDump(buffer)),
+                ByteBufUtil.equals(expected, buffer));
+    }
 
     private void writeToChannel(String input) {
         final ByteBuf buf = directBuffer(1000);

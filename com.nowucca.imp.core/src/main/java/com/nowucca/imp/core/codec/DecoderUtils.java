@@ -28,9 +28,10 @@ public final class DecoderUtils {
 
     public static String readAtom(ByteBuf in) {
         final StringBuilder atom = new StringBuilder();
-        final char next = (char) in.readByte();
+        char next = peekNextChar(in);
         while (isATOM_CHAR(next)) {
-            atom.append(next);
+            atom.append((char)in.readByte());
+            next = peekNextChar(in);
         }
         return atom.toString();
     }
@@ -65,11 +66,11 @@ public final class DecoderUtils {
 
     public static long readNumber(ByteBuf in) {
         final StringBuilder digits = new StringBuilder();
-        char c;
-        do {
-            c = (char) in.readByte();
-            digits.append(c);
-        } while (isDigit(c));
+        char c = peekNextChar(in);
+        while (isDigit(c)) {
+            digits.append((char) in.readByte());
+            c = peekNextChar(in);
+        }
         return Long.parseLong(digits.toString());
     }
 

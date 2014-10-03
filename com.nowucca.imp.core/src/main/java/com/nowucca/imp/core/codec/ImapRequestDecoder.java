@@ -75,13 +75,21 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
 
             case READ_COMMAND_NAME: {
                 try {
-                    final char c = (char) in.getByte(in.readerIndex());
+                    final char c = peekNextChar(in);
                     switch(c) {
                         case 'A': {
                             readCaseInsensitiveExpectedBytes(in, "APPEND");
+                            readExpectedByte(in, ' ');
                             final String mailboxName = readMailboxName(ctx, in);
+                            readExpectedByte(in, ' ');
                             final Flags flags = readOptionalAppendFlags(in);
+                            if (flags != null) {
+                                readExpectedByte(in, ' ');
+                            }
                             final Date dateTime = readOptionalDateTime(in);
+                            if (dateTime != null) {
+                                readExpectedByte(in, ' ');
+                            }
                             final ByteBuf data = readLiteral(ctx, in);
 
                             imapCommand = new AppendCommand(mailboxName, flags, dateTime, data);
