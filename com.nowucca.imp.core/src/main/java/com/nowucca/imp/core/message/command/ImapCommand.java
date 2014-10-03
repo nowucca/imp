@@ -11,5 +11,5 @@ public interface ImapCommand {
 
     String getCommandName();
 
-    List<String> getArguments();
+    List<?> getArguments();
 }

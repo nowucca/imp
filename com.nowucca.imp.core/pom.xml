@@ -12,6 +12,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jutf7.version>1.0.0</jutf7.version>
   </properties>
 
   <dependencies>
@@ -27,6 +28,18 @@
       <artifactId>netty-all</artifactId> <!-- Use 'netty-all' for 4.0 or above -->
       <version>4.0.21.Final</version>
       <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.beetstra.jutf7</groupId>
+      <artifactId>jutf7</artifactId>
+      <version>${jutf7.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.mail</groupId>
+      <artifactId>javax.mail-api</artifactId>
+      <version>1.5.2</version>
     </dependency>
 
     <dependency>

@@ -10,6 +10,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.DecoderResult;
 import io.netty.handler.codec.TooLongFrameException;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +53,11 @@ public class ImapRequestDecoderTest {
         expectSuccessfulRequest("A002", "CAPABILITY");
     }
 
+    @Test
+    public void shouldParseTaggedCapabilityCommandCaseInsensitive() throws Exception {
+        writeToChannel("A002 CAPABILITY\r\n");
+        expectSuccessfulRequest("A002", "CaPaBiLiTy");
+    }
 
     @Test
     public void shouldParseTaggedLogoutCommand() throws Exception {
@@ -106,7 +114,7 @@ public class ImapRequestDecoderTest {
         assertNotNull(imapRequest);
         assertEquals(tag, imapRequest.getTag());
         assertNotNull(imapRequest.getCommand());
-        assertEquals(commandName, imapRequest.getCommand().getCommandName());
+        assertEquals(commandName.toUpperCase(), imapRequest.getCommand().getCommandName());
     }
 
     private void expectInvalidRequest(Class<?> exceptionClass) {
