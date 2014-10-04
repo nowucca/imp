@@ -10,6 +10,7 @@ import com.nowucca.imp.core.message.command.ImapRequest;
 import com.nowucca.imp.core.message.command.InvalidImapRequest;
 import com.nowucca.imp.core.message.command.LogoutCommand;
 import com.nowucca.imp.core.message.command.NoopCommand;
+import com.nowucca.imp.core.message.command.StartTlsCommand;
 import com.nowucca.imp.util.ModifiedUTF7;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufProcessor;
@@ -111,6 +112,12 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
                         case 'N': {
                             readCaseInsensitiveExpectedBytes(in, "NOOP");
                             imapCommand = new NoopCommand();
+                            checkpoint(State.READ_CRLF);
+                            break;
+                        }
+                        case 'S': {
+                            readCaseInsensitiveExpectedBytes(in, "STARTTLS");
+                            imapCommand = new StartTlsCommand();
                             checkpoint(State.READ_CRLF);
                             break;
                         }
