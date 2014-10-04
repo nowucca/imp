@@ -37,7 +37,7 @@ public final class DecoderUtils {
     }
 
     public static CharSequence readQuoted(ByteBuf in) {
-        final AppendableCharSequence result = new AppendableCharSequence(in.readableBytes());
+        final AppendableCharSequence result = new AppendableCharSequence(128);
         readExpectedByte(in, '"');
         char c = (char) in.readByte();
         while (c != '"') {
@@ -177,7 +177,7 @@ public final class DecoderUtils {
                     ; from the given time will give the UT form.
                     ; The Universal Time zone is "+0000".
          */
-        if (chars.length() != 26) {
+        if (chars.toString().length() != 26) {
             throw new IllegalArgumentException(format("Expected valid date-time, found %s", chars));
         }
 

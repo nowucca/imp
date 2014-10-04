@@ -12,7 +12,11 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.DecoderResult;
 import io.netty.handler.codec.TooLongFrameException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import javax.mail.Flags;
 import org.junit.After;
 import org.junit.Assert;
@@ -143,6 +147,45 @@ public class ImapRequestDecoderTest {
 
         assertThat(arguments.get(3), instanceOf(ByteBuf.class));
         assertEquals(310, ((ByteBuf) arguments.get(3)).readableBytes());
+    }
+
+    @Test
+    public void shouldParseComplexAppendCommand() throws Exception {
+        writeToChannel("A010 APPEND saved-messages (\\Seen \\Answered) \"11-MAY-1972 12:50:01 +0800\" {44}\r\n");
+
+        final ByteBuf expected = Unpooled.wrappedBuffer(ImapRequestDecoder.CONTINUATION_BYTES);
+        final ByteBuf buffer = (ByteBuf) channel.readOutbound();
+        assertByteBufsEqual(expected, buffer);
+
+        writeToChannel("Date: Mon, 7 Feb 1994 21:52:25 -0800 (PST)\r\n");
+        writeToChannel("\r\n");
+
+        final ImapRequest appendRequest = expectSuccessfulRequest("A010", "APPEND");
+        final List<?> arguments = appendRequest.getCommand().getArguments();
+        assertEquals(4, arguments.size());
+
+
+        assertThat(arguments.get(0), instanceOf(String.class));
+        assertThat("saved-messages", equalTo(arguments.get(0)));
+
+        assertThat(arguments.get(1), instanceOf(Flags.class));
+        final Flags flags = (Flags) arguments.get(1);
+        assertTrue(flags.contains(Flags.Flag.SEEN));
+        assertTrue(flags.contains(Flags.Flag.ANSWERED));
+        assertEquals(2, flags.getSystemFlags().length);
+        assertEquals(0, flags.getUserFlags().length);
+
+        // no date-time
+        assertThat(arguments.get(2), instanceOf(Date.class));
+        final Date dateTime = (Date) arguments.get(2);
+        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.US);
+        calendar.setTime(dateTime);
+        assertEquals(11, calendar.get(Calendar.DAY_OF_MONTH));
+        assertEquals(Calendar.MAY, calendar.get(Calendar.MONTH));
+        assertEquals(1972, calendar.get(Calendar.YEAR));
+
+        assertThat(arguments.get(3), instanceOf(ByteBuf.class));
+        assertEquals(44, ((ByteBuf) arguments.get(3)).readableBytes());
     }
 
     private void assertByteBufsEqual(ByteBuf expected, ByteBuf buffer) {
