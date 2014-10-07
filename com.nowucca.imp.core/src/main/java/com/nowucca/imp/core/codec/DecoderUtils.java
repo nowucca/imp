@@ -30,7 +30,7 @@ public final class DecoderUtils {
         final StringBuilder atom = new StringBuilder();
         char next = peekNextChar(in);
         while (isATOM_CHAR(next)) {
-            atom.append((char)in.readByte());
+            atom.append((char) in.readByte());
             next = peekNextChar(in);
         }
         return atom.toString();

@@ -3,8 +3,6 @@
  */
 package com.nowucca.imp.core.codec;
 
-import io.netty.util.internal.AppendableCharSequence;
-
 /**
  */
 public final class ImapCodecConstants {
