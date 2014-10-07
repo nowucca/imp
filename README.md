@@ -28,7 +28,7 @@ Usage
 * Download from github.
 * Depends on Java 1.7 and maven3 to install.
 
-* ./build.sh
+* mvn clean install
 * cd com.nowucca.imp.proxy
 * mvn -Pproxy package
 
