@@ -7,6 +7,12 @@ import com.nowucca.imp.core.message.command.ImapRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.TooLongFrameException;
+import java.time.DayOfWeek;
+import java.time.Month;
+import java.time.MonthDay;
+import java.time.Year;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalField;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -88,13 +94,12 @@ public class AppendCommandDecoderTest extends BaseDecoderTest {
         assertEquals(0, flags.getUserFlags().length);
 
         // no date-time
-        assertThat(arguments.get(2), instanceOf(Date.class));
-        final Date dateTime = (Date) arguments.get(2);
-        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.US);
-        calendar.setTime(dateTime);
-        assertEquals(11, calendar.get(Calendar.DAY_OF_MONTH));
-        assertEquals(Calendar.MAY, calendar.get(Calendar.MONTH));
-        assertEquals(1972, calendar.get(Calendar.YEAR));
+        assertThat(arguments.get(2), instanceOf(ZonedDateTime.class));
+        final ZonedDateTime dateTime = (ZonedDateTime) arguments.get(2);
+
+        assertEquals(MonthDay.of(Month.MAY,  11), MonthDay.from(dateTime));
+        assertEquals(Month.MAY, Month.from(dateTime));
+        assertEquals(Year.of(1972), Year.from(dateTime));
 
         assertThat(arguments.get(3), instanceOf(ByteBuf.class));
         assertEquals(44, ((ByteBuf) arguments.get(3)).readableBytes());

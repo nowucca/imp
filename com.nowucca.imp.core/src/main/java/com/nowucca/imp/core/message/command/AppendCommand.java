@@ -4,8 +4,8 @@
 package com.nowucca.imp.core.message.command;
 
 import io.netty.buffer.ByteBuf;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import javax.mail.Flags;
 
@@ -15,10 +15,10 @@ public class AppendCommand implements ImapCommand  {
 
     private String mailboxName;
     private Flags flags;
-    private Date dateTime;
+    private ZonedDateTime dateTime;
     private ByteBuf messageLiteral;
 
-    public AppendCommand(String mailboxName, Flags flags, Date dateTime, ByteBuf messageLiteral) {
+    public AppendCommand(String mailboxName, Flags flags, ZonedDateTime dateTime, ByteBuf messageLiteral) {
         this.mailboxName = mailboxName;
         this.flags = flags;
         this.dateTime = dateTime;

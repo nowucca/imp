@@ -21,8 +21,8 @@ import io.netty.handler.codec.ReplayingDecoder;
 import io.netty.handler.codec.TooLongFrameException;
 import io.netty.util.internal.AppendableCharSequence;
 import java.nio.charset.Charset;
+import java.time.ZonedDateTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import javax.mail.Flags;
@@ -87,7 +87,7 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
                             if (flags != null) {
                                 readExpectedByte(in, ' ');
                             }
-                            final Date dateTime = readOptionalDateTime(in);
+                            final ZonedDateTime dateTime = readOptionalDateTime(in);
                             if (dateTime != null) {
                                 readExpectedByte(in, ' ');
                             }

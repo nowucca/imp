@@ -6,11 +6,9 @@ package com.nowucca.imp.core.codec;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.internal.AppendableCharSequence;
 import java.nio.charset.Charset;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import static java.lang.String.format;
 
 /**
@@ -143,7 +141,7 @@ public final class DecoderUtils {
     }
 
 
-    public static Date readOptionalDateTime(ByteBuf in) {
+    public static ZonedDateTime readOptionalDateTime(ByteBuf in) {
         if (peekNextChar(in) != '"') {
             return null;
         }
@@ -188,7 +186,7 @@ public final class DecoderUtils {
         final char month1 = chars.charAt(3);
         final char month2 = chars.charAt(4);
         final char month3 = chars.charAt(5);
-        final int month = decodeMonth(month1, month2, month3);
+        final Month month = decodeMonth(month1, month2, month3);
 
         final char year1 = chars.charAt(7);
         final char year2 = chars.charAt(8);
@@ -217,10 +215,7 @@ public final class DecoderUtils {
         final char second2 = chars.charAt(19);
         final int second = decodeNumber(second1, second2);
 
-        final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("GMT"), Locale.US);
-        calendar.clear();
-        calendar.set(year, month, day, hour, minute, second);
-        return calendar.getTime();
+        return ZonedDateTime.of(year, month.getValue(), day, hour, minute, second, 0, ZoneId.of("GMT"));
     }
 
     public static int decodeFixedDay(final char dayHigh, final char dayLow) throws IllegalArgumentException {
@@ -265,8 +260,10 @@ public final class DecoderUtils {
     private static final int ALL_MONTH_BITS = JAN_BIT | FEB_BIT | MAR_BIT | APR_BIT | MAY_BIT | JUN_BIT |
                                               JUL_BIT | AUG_BIT | SEP_BIT | OCT_BIT | NOV_BIT | DEC_BIT;
 
-    public static int decodeMonth(final char monthFirstChar, final char monthSecondChar, final char monthThirdChar)  {
-        final int result;
+    public static Month decodeMonth(final char monthFirstChar,
+                                    final char monthSecondChar,
+                                    final char monthThirdChar)  {
+        final Month result;
         // Bitwise magic! Eliminate possibility by three switches
         int possibleMonths = ALL_MONTH_BITS;
         switch (monthFirstChar) {
@@ -382,40 +379,40 @@ public final class DecoderUtils {
         }
         switch (possibleMonths) {
             case JAN_BIT:
-                result = Calendar.JANUARY;
+                result = Month.JANUARY;
                 break;
             case FEB_BIT:
-                result = Calendar.FEBRUARY;
+                result = Month.FEBRUARY;
                 break;
             case MAR_BIT:
-                result = Calendar.MARCH;
+                result = Month.MARCH;
                 break;
             case APR_BIT:
-                result = Calendar.APRIL;
+                result = Month.APRIL;
                 break;
             case MAY_BIT:
-                result = Calendar.MAY;
+                result = Month.MAY;
                 break;
             case JUN_BIT:
-                result = Calendar.JUNE;
+                result = Month.JUNE;
                 break;
             case JUL_BIT:
-                result = Calendar.JULY;
+                result = Month.JULY;
                 break;
             case AUG_BIT:
-                result = Calendar.AUGUST;
+                result = Month.AUGUST;
                 break;
             case SEP_BIT:
-                result = Calendar.SEPTEMBER;
+                result = Month.SEPTEMBER;
                 break;
             case OCT_BIT:
-                result = Calendar.OCTOBER;
+                result = Month.OCTOBER;
                 break;
             case NOV_BIT:
-                result = Calendar.NOVEMBER;
+                result = Month.NOVEMBER;
                 break;
             case DEC_BIT:
-                result = Calendar.DECEMBER;
+                result = Month.DECEMBER;
                 break;
             default:
                 throw new IllegalArgumentException(format("Expected month name but was %s",
