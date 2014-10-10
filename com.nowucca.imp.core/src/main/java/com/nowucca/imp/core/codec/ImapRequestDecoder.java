@@ -4,6 +4,7 @@
 package com.nowucca.imp.core.codec;
 
 import com.nowucca.imp.core.message.command.AppendCommand;
+import com.nowucca.imp.core.message.command.AuthenticateCommand;
 import com.nowucca.imp.core.message.command.CapabilityCommand;
 import com.nowucca.imp.core.message.command.ImapCommand;
 import com.nowucca.imp.core.message.command.ImapRequest;
@@ -79,22 +80,37 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
                     final char c = peekNextChar(in);
                     switch(c) {
                         case 'A': {
-                            readCaseInsensitiveExpectedBytes(in, "APPEND");
-                            readExpectedByte(in, ' ');
-                            final String mailboxName = readMailboxName(ctx, in);
-                            readExpectedByte(in, ' ');
-                            final Flags flags = readOptionalAppendFlags(in);
-                            if (flags != null) {
-                                readExpectedByte(in, ' ');
-                            }
-                            final ZonedDateTime dateTime = readOptionalDateTime(in);
-                            if (dateTime != null) {
-                                readExpectedByte(in, ' ');
-                            }
-                            final ByteBuf data = readLiteral(ctx, in);
+                            final char c2 = peekNextChar(in, 1);
+                            switch (c2) {
+                                case 'P': {
 
-                            imapCommand = new AppendCommand(mailboxName, flags, dateTime, data);
-                            checkpoint(READ_CRLF);
+                                    readCaseInsensitiveExpectedBytes(in, "APPEND");
+                                    readExpectedByte(in, ' ');
+                                    final String mailboxName = readMailboxName(ctx, in);
+                                    readExpectedByte(in, ' ');
+                                    final Flags flags = readOptionalAppendFlags(in);
+                                    if (flags != null) {
+                                        readExpectedByte(in, ' ');
+                                    }
+                                    final ZonedDateTime dateTime = readOptionalDateTime(in);
+                                    if (dateTime != null) {
+                                        readExpectedByte(in, ' ');
+                                    }
+                                    final ByteBuf data = readLiteral(ctx, in);
+
+                                    imapCommand = new AppendCommand(mailboxName, flags, dateTime, data);
+                                    checkpoint(READ_CRLF);
+                                    break;
+                                }
+                                case 'U': {
+                                    readCaseInsensitiveExpectedBytes(in, "AUTHENTICATE");
+                                    readExpectedSpace(in);
+                                    final CharSequence authenticationMechanism = readAuthenticationMechanismName(in);
+                                    imapCommand = new AuthenticateCommand(authenticationMechanism);
+                                    checkpoint(READ_CRLF);
+                                    break;
+                                }
+                            }
                             break;
                         }
                         case 'C': {
@@ -175,6 +191,38 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
             }
         }
     }
+
+    /**
+     * Authentication mechanism naming is defined in RFC 4422, Section 3.1.
+     *
+     * <pre>
+     * sasl-mech    = 1*20mech-char
+     * mech-char    = UPPER-ALPHA / DIGIT / HYPHEN / UNDERSCORE
+     * ; mech-char is restricted to A-Z (uppercase only), 0-9, -, and _
+     * ; from ASCII character set.
+     *
+     * UPPER-ALPHA  = %x41-5A  ; A-Z (uppercase only)
+     * DIGIT        = %x30-39  ; 0-9
+     * HYPHEN       = %x2D ; hyphen (-)
+     * UNDERSCORE   = %x5F ; underscore (_)
+     * </pre>
+     * @return a syntactically legal SASL mechanism name
+     */
+    private AppendableCharSequence readAuthenticationMechanismName(ByteBuf in) {
+        final AppendableCharSequence result = new AppendableCharSequence(20);
+
+        char next = peekNextChar(in);
+        while (isSASLMechanismChar(next)) {
+            result.append((char) in.readByte());
+            next = peekNextChar(in);
+        }
+        if (result.length() > 20) {
+            throw new IllegalArgumentException(
+                    format("Authentication mechanism %s exceeds 20 characters in length.", result.toString()));
+        }
+        return result;
+    }
+
 
     private Flags readOptionalAppendFlags(ByteBuf in) {
         final char next = peekNextChar(in);

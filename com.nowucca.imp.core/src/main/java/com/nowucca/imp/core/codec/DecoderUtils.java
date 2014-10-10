@@ -24,6 +24,10 @@ public final class DecoderUtils {
         return (char) in.getByte(in.readerIndex());
     }
 
+    public static char peekNextChar(ByteBuf in, int readerIndexOffset) {
+        return (char) in.getByte(in.readerIndex() + readerIndexOffset);
+    }
+
     public static String readAtom(ByteBuf in) {
         final StringBuilder atom = new StringBuilder();
         char next = peekNextChar(in);
@@ -53,6 +57,10 @@ public final class DecoderUtils {
         }
     }
 
+    public static void readExpectedSpace(ByteBuf in) {
+        readExpectedByte(in, ' ');
+    }
+
     public static  void readCaseInsensitiveExpectedBytes(ByteBuf in, String expectedBytes) {
         final int expectedLength = expectedBytes.length();
         final String actual = in.readBytes(expectedLength).toString(US_ASCII);
@@ -80,6 +88,15 @@ public final class DecoderUtils {
     public static void readCRLF(ByteBuf in) {
         readExpectedByte(in, '\r');
         readExpectedByte(in, '\n');
+    }
+
+
+    public static boolean isSASLMechanismChar(char c) {
+        return isUpperAlphaChar(c) || isDigit(c) || c == '-' || c == '_';
+    }
+
+    private static boolean isUpperAlphaChar(char c) {
+        return c >= 0x41 && c <= 0x5A;
     }
 
     public static boolean isDigit(char c) {
