@@ -9,13 +9,13 @@ import com.nowucca.imp.core.message.command.CapabilityCommand;
 import com.nowucca.imp.core.message.command.ImapCommand;
 import com.nowucca.imp.core.message.command.ImapRequest;
 import com.nowucca.imp.core.message.command.InvalidImapRequest;
+import com.nowucca.imp.core.message.command.LoginCommand;
 import com.nowucca.imp.core.message.command.LogoutCommand;
 import com.nowucca.imp.core.message.command.NoopCommand;
 import com.nowucca.imp.core.message.command.StartTlsCommand;
 import com.nowucca.imp.util.ModifiedUTF7;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufProcessor;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.DecoderResult;
 import io.netty.handler.codec.ReplayingDecoder;
@@ -39,7 +39,6 @@ import static java.lang.String.format;
 public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.State> {
 
     private static final Charset US_ASCII = Charset.forName("US-ASCII");
-    public static final byte[] CONTINUATION_BYTES = new byte[]{'+', '\r', '\n'};
 
     public static enum State {
         READ_TAG,
@@ -120,9 +119,25 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
                             break;
                         }
                         case 'L': {
-                            readCaseInsensitiveExpectedBytes(in, "LOGOUT");
-                            imapCommand = new LogoutCommand();
-                            checkpoint(State.READ_CRLF);
+                            final char c4 = peekNextChar(in, 3);
+                            switch(c4) {
+                                case 'I': {
+                                    readCaseInsensitiveExpectedBytes(in, "LOGIN");
+                                    readExpectedSpace(in);
+                                    final CharSequence userId = readAString(ctx, in);
+                                    readExpectedSpace(in);
+                                    final CharSequence password = readAString(ctx, in);
+                                    imapCommand = new LoginCommand(userId, password);
+                                    checkpoint(State.READ_CRLF);
+                                    break;
+                                }
+                                case 'O': {
+                                    readCaseInsensitiveExpectedBytes(in, "LOGOUT");
+                                    imapCommand = new LogoutCommand();
+                                    checkpoint(State.READ_CRLF);
+                                    break;
+                                }
+                            }
                             break;
                         }
                         case 'N': {
@@ -322,6 +337,7 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
         imapRequest = null;
         return ret;
     }
+
     private abstract class BaseParser implements ByteBufProcessor {
         protected final AppendableCharSequence seq;
         protected int size;
@@ -405,38 +421,5 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
         }
     }
 
-    public ByteBuf readLiteral(ChannelHandlerContext ctx, ByteBuf in) {
-        ByteBuf result;
-
-        readExpectedByte(in, '{');
-        final long size = readNumber(in);
-        readExpectedByte(in, '}');
-        readCRLF(in);
-
-        // send continuation command back to client
-        ctx.channel().writeAndFlush(Unpooled.wrappedBuffer(CONTINUATION_BYTES));
-
-        if (size > Integer.MAX_VALUE) {
-            //TODO use countdown and composite byte buffers to read large buffers
-            throw new UnsupportedOperationException(format("Large literals not supported."));
-        } else {
-            result = readBytes(in, (int) size);
-        }
-        result.forEachByte(char8Validator);
-        return result;
-    }
-
-
-
-    private final Char8Validator char8Validator = new Char8Validator();
-    private final class Char8Validator implements ByteBufProcessor {
-        @Override
-        public boolean process(byte value) throws Exception {
-            if (!isCHAR8((char) value)) {
-                throw new IllegalArgumentException(format("Expected a CHAR8 character, found '%s'", value));
-            }
-            return true;
-        }
-    }
 
 }

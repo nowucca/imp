@@ -4,6 +4,9 @@
 package com.nowucca.imp.core.codec;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufProcessor;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.internal.AppendableCharSequence;
 import java.nio.charset.Charset;
 import java.time.Month;
@@ -16,6 +19,7 @@ import static java.lang.String.format;
 public final class DecoderUtils {
 
     private static final Charset US_ASCII = Charset.forName("US-ASCII");
+    static final byte[] CONTINUATION_BYTES = new byte[]{'+', '\r', '\n'};
 
     private DecoderUtils() {
     }
@@ -42,13 +46,129 @@ public final class DecoderUtils {
         final AppendableCharSequence result = new AppendableCharSequence(128);
         readExpectedByte(in, '"');
         char c = (char) in.readByte();
-        while (c != '"') {
-            result.append(c);
+
+        boolean escapedMode = false;
+        do {
+            if (escapedMode) {
+                if (isQuotedSpecial(c)) {
+                    escapedMode = false;
+                }
+                result.append(c);
+            } else {
+                if (c == '\\') {
+                    escapedMode = true;
+                } else {
+                    if (!isQuotedChar(c)) {
+                        throw new IllegalArgumentException(format("Illegal character %s", c));
+                    }
+                    result.append(c);
+                }
+            }
+
             c = (char) in.readByte();
-        }
+        } while (c != '"' || escapedMode);
+
+
         return result;
     }
 
+    /**
+     * astring =  1*ASTRING-CHAR / quoted / literal
+     *
+     * @param in
+     * @return
+     */
+    public static CharSequence readAString(ChannelHandlerContext ctx, ByteBuf in) {
+        CharSequence aString;
+
+        final char next = peekNextChar(in);
+        switch(next) {
+            case '"':
+                aString = readQuoted(in);
+                break;
+            case '{':
+                aString = readLiteral(ctx, in).toString(US_ASCII);
+                break;
+            default:
+                aString = readAstringRaw(in);
+        }
+        return aString;
+    }
+
+    private static CharSequence readAstringRaw(ByteBuf in) {
+        final AppendableCharSequence aString = new AppendableCharSequence(128);
+        char next = peekNextChar(in);
+        while (isASTRING_CHAR(next) && !isWhitespace(next)) {
+            aString.append((char) in.readByte());
+            next = peekNextChar(in);
+        }
+        return aString;
+    }
+
+    public static ByteBuf readLiteral(ChannelHandlerContext ctx, ByteBuf in) {
+        ByteBuf result;
+
+        readExpectedByte(in, '{');
+        final long size = readNumber(in);
+        readExpectedByte(in, '}');
+        readCRLF(in);
+
+        // send continuation command back to client
+        ctx.channel().writeAndFlush(Unpooled.wrappedBuffer(CONTINUATION_BYTES));
+
+        if (size > Integer.MAX_VALUE) {
+            //TODO use countdown and composite byte buffers to read large buffers
+            throw new UnsupportedOperationException(format("Large literals not supported."));
+        } else {
+            result = readBytes(in, (int) size);
+        }
+        result.forEachByte(char8Validator);
+        return result;
+    }
+
+
+
+    private static final Char8Validator char8Validator = new Char8Validator();
+    private static final class Char8Validator implements ByteBufProcessor {
+        @Override
+        public boolean process(byte value) throws Exception {
+            if (!isCHAR8((char) value)) {
+                throw new IllegalArgumentException(format("Expected a CHAR8 character, found '%s'", value));
+            }
+            return true;
+        }
+    }
+
+
+    public static CharSequence readBase64(ByteBuf in) {
+        if (isBase64Char(peekNextChar(in))) {
+            final AppendableCharSequence result = new AppendableCharSequence(128);
+            do {
+                final char c1 = (char) in.readByte();
+                final char c2 = (char) in.readByte();
+                final char c3 = (char) in.readByte();
+                final char c4 = (char) in.readByte();
+                if (isBase64Char(c1) && isBase64Char(c2) &&
+                        (isBase64Char(c3) || c3 == '=') &&
+                        (isBase64Char(c4) || c4 == '=')) {
+                    result.append(c1).append(c2).append(c3).append(c4);
+                } else {
+                    throw new IllegalArgumentException(
+                            format("Illegal characters found in base 64 sequence: %s%s%s%s", c1, c3, c3, c4));
+                }
+                if (c4 == '=') {
+                    break;
+                }
+            } while (true);
+            return result;
+        } else {
+            return "";
+        }
+    }
+
+    private static boolean isBase64Char(char c) {
+        return isAlphaChar(c) || isDigit(c) || c == '+' || c == '/';
+    }
 
     public static void readExpectedByte(ByteBuf in, char expected) {
         final char c = (char) in.readByte();
@@ -97,6 +217,11 @@ public final class DecoderUtils {
 
     private static boolean isUpperAlphaChar(char c) {
         return c >= 0x41 && c <= 0x5A;
+    }
+
+    private static boolean isAlphaChar(char c) {
+        return (c >= 0x41 && c <= 0x5A) ||
+               (c >= 0x61 && c <= 0x7A);
     }
 
     public static boolean isDigit(char c) {

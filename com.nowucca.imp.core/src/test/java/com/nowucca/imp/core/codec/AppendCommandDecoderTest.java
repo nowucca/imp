@@ -31,7 +31,7 @@ public class AppendCommandDecoderTest extends BaseDecoderTest {
     public void shouldParseSimpleAppendCommand() throws Exception {
         writeToChannel("A010 APPEND saved-messages (\\Seen) {310}\r\n");
 
-        final ByteBuf expected = Unpooled.wrappedBuffer(ImapRequestDecoder.CONTINUATION_BYTES);
+        final ByteBuf expected = Unpooled.wrappedBuffer(DecoderUtils.CONTINUATION_BYTES);
         final ByteBuf buffer = (ByteBuf) channel.readOutbound();
         assertByteBufsEqual(expected, buffer);
 
@@ -71,7 +71,7 @@ public class AppendCommandDecoderTest extends BaseDecoderTest {
     public void shouldParseComplexAppendCommand() throws Exception {
         writeToChannel("A010 APPEND saved-messages (\\Seen \\Answered) \"11-MAY-1972 12:50:01 +0800\" {44}\r\n");
 
-        final ByteBuf expected = Unpooled.wrappedBuffer(ImapRequestDecoder.CONTINUATION_BYTES);
+        final ByteBuf expected = Unpooled.wrappedBuffer(DecoderUtils.CONTINUATION_BYTES);
         final ByteBuf buffer = (ByteBuf) channel.readOutbound();
         assertByteBufsEqual(expected, buffer);
 
