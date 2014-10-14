@@ -35,7 +35,7 @@ public final class DecoderUtils {
     public static String readAtom(ByteBuf in) {
         final StringBuilder atom = new StringBuilder();
         char next = peekNextChar(in);
-        while (isATOM_CHAR(next)) {
+        while (isATOM_CHAR(next) && !isWhitespace(next)) {
             atom.append((char) in.readByte());
             next = peekNextChar(in);
         }

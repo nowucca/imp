@@ -12,6 +12,7 @@ import com.nowucca.imp.core.message.command.InvalidImapRequest;
 import com.nowucca.imp.core.message.command.LoginCommand;
 import com.nowucca.imp.core.message.command.LogoutCommand;
 import com.nowucca.imp.core.message.command.NoopCommand;
+import com.nowucca.imp.core.message.command.SelectCommand;
 import com.nowucca.imp.core.message.command.StartTlsCommand;
 import com.nowucca.imp.util.ModifiedUTF7;
 import io.netty.buffer.ByteBuf;
@@ -53,7 +54,6 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
 
     private final AppendableCharSequence seq = new AppendableCharSequence(128);
     private final TagParser tagParser = new TagParser(seq);
-    private final QuotedStringParser quotedStringParser = new QuotedStringParser(seq);
 
 
 
@@ -147,9 +147,22 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
                             break;
                         }
                         case 'S': {
-                            readCaseInsensitiveExpectedBytes(in, "STARTTLS");
-                            imapCommand = new StartTlsCommand();
-                            checkpoint(State.READ_CRLF);
+                            final char c2 = peekNextChar(in, 1);
+                            switch(c2) {
+                                case 'E': {
+                                    readCaseInsensitiveExpectedBytes(in, "SELECT");
+                                    readExpectedSpace(in);
+                                    imapCommand = new SelectCommand(readMailboxName(ctx, in));
+                                    checkpoint(State.READ_CRLF);
+                                    break;
+                                }
+                                case 'T': {
+                                    readCaseInsensitiveExpectedBytes(in, "STARTTLS");
+                                    imapCommand = new StartTlsCommand();
+                                    checkpoint(State.READ_CRLF);
+                                    break;
+                                }
+                            }
                             break;
                         }
                         case 'X': {
@@ -312,7 +325,7 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
         final char next = peekNextChar(in);
         switch(next) {
             case '"':
-                mailboxName = quotedStringParser.parse(in).toString();
+                mailboxName = readQuoted(in).toString(); // quotedStringParser.parse(in).toString();
                 break;
             case '{':
                 mailboxName = readLiteral(ctx, in).toString(US_ASCII);
@@ -396,30 +409,6 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
         }
     }
 
-    private final class QuotedStringParser extends BaseParser implements ByteBufProcessor {
-        QuotedStringParser(AppendableCharSequence seq) {
-            super(seq);
-        }
-        private boolean escapedMode;
-
-        @Override
-        protected boolean isValidChar(char c) {
-            if (escapedMode) {
-                final boolean result = isQuotedSpecial(c);
-                if (result) {
-                    escapedMode = false;
-                }
-                return result;
-            } else {
-                if (c == '\\') {
-                    escapedMode = true;
-                    return true;
-                } else {
-                    return c == '"' || isQuotedChar(c);
-                }
-            }
-        }
-    }
 
 
 }
