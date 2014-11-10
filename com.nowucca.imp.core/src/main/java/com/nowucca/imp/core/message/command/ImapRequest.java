@@ -3,12 +3,10 @@
  */
 package com.nowucca.imp.core.message.command;
 
-import com.nowucca.imp.core.DecoderResultProvider;
-
 /**
  * The IMAP request with a tag and a command.
  */
-public interface ImapRequest extends DecoderResultProvider {
+public interface ImapRequest {
 
     ImapCommand getCommand();
 

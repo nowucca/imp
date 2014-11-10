@@ -16,6 +16,11 @@ public class SelectCommand implements ImapCommand {
     }
 
     @Override
+    public Kind getKind() {
+        return Kind.SELECT;
+    }
+
+    @Override
     public String getCommandName() {
         return "SELECT";
     }

@@ -40,12 +40,10 @@ public class InvalidImapRequest implements ImapRequest {
         return tag;
     }
 
-    @Override
     public void setDecoderResult(DecoderResult result) {
         this.decoderResult = result;
     }
 
-    @Override
     public DecoderResult getDecoderResult() {
         return decoderResult;
     }

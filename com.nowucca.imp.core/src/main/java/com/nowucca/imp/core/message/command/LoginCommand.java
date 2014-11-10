@@ -19,6 +19,11 @@ public class LoginCommand implements ImapCommand {
     }
 
     @Override
+    public Kind getKind() {
+        return Kind.LOGIN;
+    }
+
+    @Override
     public String getCommandName() {
         return "LOGIN";
     }

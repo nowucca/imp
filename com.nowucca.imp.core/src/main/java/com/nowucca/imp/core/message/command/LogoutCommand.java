@@ -8,6 +8,12 @@ import java.util.List;
 /**
  */
 public class LogoutCommand implements ImapCommand {
+
+    @Override
+    public Kind getKind() {
+        return Kind.LOGOUT;
+    }
+
     @Override
     public String getCommandName() {
         return "LOGOUT";

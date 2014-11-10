@@ -8,6 +8,12 @@ import java.util.List;
 /**
  */
 public class StartTlsCommand implements ImapCommand {
+
+    @Override
+    public Kind getKind() {
+        return Kind.STARTTLS;
+    }
+
     @Override
     public String getCommandName() {
         return "STARTTLS";

@@ -17,6 +17,11 @@ public class AuthenticateCommand implements ImapCommand {
     }
 
     @Override
+    public Kind getKind() {
+        return Kind.AUTHENTICATE;
+    }
+
+    @Override
     public String getCommandName() {
         return "AUTHENTICATE";
     }

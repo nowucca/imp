@@ -11,5 +11,18 @@ public interface ImapCommand {
 
     String getCommandName();
 
+    Kind getKind();
+
     List<?> getArguments();
+
+    public enum Kind {
+        APPEND,
+        AUTHENTICATE,
+        CAPABILITY,
+        LOGIN,
+        LOGOUT,
+        NOOP,
+        SELECT,
+        INVALID, STARTTLS
+    }
 }

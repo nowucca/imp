@@ -31,7 +31,28 @@ public class AppendCommand implements ImapCommand  {
     }
 
     @Override
+    public Kind getKind() {
+        return Kind.APPEND;
+    }
+
+    @Override
     public List<?> getArguments() {
         return Arrays.asList(mailboxName, flags, dateTime, messageLiteral);
+    }
+
+    public String getMailboxName() {
+        return mailboxName;
+    }
+
+    public Flags getFlags() {
+        return flags;
+    }
+
+    public ZonedDateTime getDateTime() {
+        return dateTime;
+    }
+
+    public ByteBuf getMessageLiteral() {
+        return messageLiteral;
     }
 }

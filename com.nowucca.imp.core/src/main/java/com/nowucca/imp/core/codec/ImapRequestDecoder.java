@@ -195,14 +195,6 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
                             return tag.toString();
                         }
 
-                        @Override
-                        public void setDecoderResult(DecoderResult result) {
-                        }
-
-                        @Override
-                        public DecoderResult getDecoderResult() {
-                            return DecoderResult.SUCCESS;
-                        }
                     });
                     checkpoint(State.READ_TAG);
                     return;
@@ -344,9 +336,9 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
 
     private ImapRequest createInvalidRequest(Exception cause) {
         checkpoint(State.INVALID_REQUEST);
-        imapRequest = new InvalidImapRequest(cause);
-        imapRequest.setDecoderResult(DecoderResult.failure(cause));
-        final ImapRequest ret = imapRequest;
+        final InvalidImapRequest invalidImapRequest = new InvalidImapRequest(cause);
+        invalidImapRequest.setDecoderResult(DecoderResult.failure(cause));
+        final ImapRequest ret = invalidImapRequest;
         imapRequest = null;
         return ret;
     }

@@ -8,6 +8,12 @@ import java.util.List;
 /**
  */
 public class CapabilityCommand implements ImapCommand {
+
+    @Override
+    public Kind getKind() {
+        return Kind.CAPABILITY;
+    }
+
     @Override
     public String getCommandName() {
         return "CAPABILITY";

@@ -8,6 +8,12 @@ import java.util.List;
 /**
  */
 public class NoopCommand implements ImapCommand {
+
+    @Override
+    public Kind getKind() {
+        return Kind.NOOP;
+    }
+
     @Override
     public String getCommandName() {
         return "NOOP";

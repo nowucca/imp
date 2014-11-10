@@ -23,6 +23,11 @@ public class InvalidImapCommand implements ImapCommand {
     }
 
     @Override
+    public Kind getKind() {
+        return Kind.INVALID;
+    }
+
+    @Override
     public String getCommandName() {
         return "INVALID_COMMAND";
     }

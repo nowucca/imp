@@ -242,7 +242,7 @@ public final class DecoderUtils {
 
 
     public static boolean isTagChar(char c) {
-        return isATOM_CHAR(c) && c != '+';
+        return isASTRING_CHAR(c) && c != '+';
     }
 
     public static boolean isATOM_CHAR(char c) {

@@ -93,7 +93,6 @@ public class AppendCommandDecoderTest extends BaseDecoderTest {
         assertEquals(2, flags.getSystemFlags().length);
         assertEquals(0, flags.getUserFlags().length);
 
-        // no date-time
         assertThat(arguments.get(2), instanceOf(ZonedDateTime.class));
         final ZonedDateTime dateTime = (ZonedDateTime) arguments.get(2);
 
