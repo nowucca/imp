@@ -2,10 +2,10 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.nowucca</groupId>
+    <groupId>com.nowucca.imp</groupId>
     <artifactId>imp-parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>develop-SNAPSHOT</version>
 
     <name>IMP Parent</name>
     <url>https://github.com/nowucca/imp.git</url>
@@ -41,6 +41,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <checkstyle.config.location>checkstyle.xml</checkstyle.config.location>
     </properties>
 
     <!--
@@ -111,8 +112,7 @@
                                 <configLocation>../checkstyle.xml</configLocation>
                                 <encoding>UTF-8</encoding>
                                 <consoleOutput>true</consoleOutput>
-                                <!-- Java 8 causes checkstyle to NPE out -->
-                                <failsOnError>false</failsOnError>
+                                <failsOnError>true</failsOnError>
                                 <failOnViolation>true</failOnViolation>
                             </configuration>
                             <goals>
@@ -120,6 +120,13 @@
                             </goals>
                         </execution>
                     </executions>
+                    <dependencies>
+                      <dependency>
+                        <groupId>com.nowucca</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>develop-SNAPSHOT</version>
+                      </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

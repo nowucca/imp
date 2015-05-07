@@ -5,8 +5,11 @@ package com.nowucca.imp.core.codec;
 
 import com.beetstra.jutf7.CharsetProvider;
 import com.nowucca.imp.core.message.command.AppendCommand;
+import com.nowucca.imp.core.message.command.AuthenticateCommand;
+import com.nowucca.imp.core.message.command.CapabilityCommand;
 import com.nowucca.imp.core.message.command.ImapCommand;
 import com.nowucca.imp.core.message.command.ImapRequest;
+import com.nowucca.imp.core.message.command.LoginCommand;
 import com.nowucca.imp.util.ModifiedUTF7;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -36,25 +39,47 @@ public class ImapRequestEncoder extends MessageToByteEncoder<ImapRequest> {
 
             // command
             final ImapCommand command = msg.getCommand();
+
             switch(command.getKind()) {
                 case APPEND: {
                     final AppendCommand appendCommand = (AppendCommand) command;
-                    out.writeBytes("APPEND".getBytes(US_ASCII));
-                    out.writeByte(SP);
+                    encodeCommandName(out, appendCommand);
+                    encodeSpace(out);
                     encodeMailboxName(appendCommand.getMailboxName(), out);
                     if (appendCommand.getFlags() != null) {
-                        out.writeByte(SP);
+                        encodeSpace(out);
                         encodeFlags(appendCommand.getFlags(), out);
                     }
                     if (appendCommand.getDateTime() != null) {
-                        out.writeByte(SP);
+                        encodeSpace(out);
                         encodeDateTime(appendCommand.getDateTime(), out);
                     }
-                    out.writeByte(SP);
+                    encodeSpace(out);
                     encodeLiteral(appendCommand.getMessageLiteral(), out);
-                    out.writeByte(CR);
-                    out.writeByte(LF);
+                    encodeCRLF(out);
                     break;
+                }
+
+                case AUTHENTICATE: {
+                    final AuthenticateCommand authenticateCommand = (AuthenticateCommand) command;
+                    encodeCommandName(out, authenticateCommand);
+                    encodeSpace(out);
+                    encodeAuthenticationMechanismName(out, authenticateCommand);
+                    encodeCRLF(out);
+                    break;
+                }
+
+                case CAPABILITY: {
+                    final CapabilityCommand capabilityCommand = (CapabilityCommand) command;
+                    encodeCommandName(out, capabilityCommand);
+                    encodeCRLF(out);
+                    break;
+                }
+
+                case LOGIN: {
+                    final LoginCommand loginCommand = (LoginCommand) command;
+                    encodeCommandName(out, loginCommand);
+
                 }
 
                 default: {
@@ -64,6 +89,11 @@ public class ImapRequestEncoder extends MessageToByteEncoder<ImapRequest> {
             }
         }
     }
+
+    private void encodeAuthenticationMechanismName(ByteBuf out, AuthenticateCommand authenticateCommand) {
+        out.writeBytes(authenticateCommand.getAuthenticationMechanismName().toString().getBytes(US_ASCII));
+    }
+
 
     private void encodeLiteral(ByteBuf messageLiteral, ByteBuf out) {
         out.writeByte('{');
@@ -91,27 +121,37 @@ public class ImapRequestEncoder extends MessageToByteEncoder<ImapRequest> {
             prependSpace = true;
         }
         if (flags.contains(Flags.Flag.SEEN)) {
-            if (prependSpace) { out.writeByte(SP); }
+            if (prependSpace) {
+                out.writeByte(SP);
+            }
             out.writeBytes(ImapCodecConstants.SEEN_ALL_CAPS_BYTES);
             prependSpace = true;
         }
         if (flags.contains(Flags.Flag.DELETED)) {
-            if (prependSpace) { out.writeByte(SP); }
+            if (prependSpace) {
+                out.writeByte(SP);
+            }
             out.writeBytes(ImapCodecConstants.DELETED_ALL_CAPS_BYTES);
             prependSpace = true;
         }
         if (flags.contains(Flags.Flag.DRAFT)) {
-            if (prependSpace) { out.writeByte(SP); }
+            if (prependSpace) {
+                out.writeByte(SP);
+            }
             out.writeBytes(ImapCodecConstants.DRAFT_ALL_CAPS_BYTES);
             prependSpace = true;
         }
         if (flags.contains(Flags.Flag.RECENT)) {
-            if (prependSpace) { out.writeByte(SP); }
+            if (prependSpace) {
+                out.writeByte(SP);
+            }
             out.writeBytes(ImapCodecConstants.RECENT_ALL_CAPS_BYTES);
             prependSpace = true;
         }
         if (flags.contains(Flags.Flag.FLAGGED)) {
-            if (prependSpace) { out.writeByte(SP); }
+            if (prependSpace) {
+                out.writeByte(SP);
+            }
             out.writeBytes(ImapCodecConstants.FLAGGED_ALL_CAPS_BYTES);
             prependSpace = true;
         }
@@ -119,7 +159,9 @@ public class ImapRequestEncoder extends MessageToByteEncoder<ImapRequest> {
         final String[] userFlags = flags.getUserFlags();
 
         for (String userFlag: userFlags) {
-            if (prependSpace) { out.writeByte(SP); }
+            if (prependSpace) {
+                out.writeByte(SP);
+            }
             out.writeBytes(userFlag.getBytes(US_ASCII));
             prependSpace = true;
         }
@@ -135,5 +177,26 @@ public class ImapRequestEncoder extends MessageToByteEncoder<ImapRequest> {
         } else {
             out.writeBytes(ModifiedUTF7.encode(mailboxName).getBytes(X_MODIFIED_UTF_7_CHARSET));
         }
+    }
+
+    private void encodeSpace(ByteBuf out) {
+        out.writeByte(SP);
+    }
+
+    private void encodeCRLF(ByteBuf out) {
+        out.writeByte(CR);
+        out.writeByte(LF);
+    }
+
+    private void encodeCommandName(ByteBuf out, ImapCommand command) {
+        writeAsciiBytes(out, command.getCommandName());
+    }
+
+    private void writeAsciiBytes(ByteBuf out, String s) {
+        out.writeBytes(s.getBytes(US_ASCII));
+    }
+
+    private void writeAsciiBytes(ByteBuf out, CharSequence s) {
+        out.writeBytes(s.toString().getBytes(US_ASCII));
     }
 }

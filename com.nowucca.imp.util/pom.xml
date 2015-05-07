@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-      <groupId>com.nowucca</groupId>
+      <groupId>com.nowucca.imp</groupId>
       <artifactId>imp-parent</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>develop-SNAPSHOT</version>
   </parent>
 
   <artifactId>com.nowucca.imp.util</artifactId>
