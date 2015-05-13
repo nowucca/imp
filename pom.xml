@@ -10,16 +10,46 @@
     <url>https://github.com/nowucca/checkstyle</url>
     <description>Configuration for code quality tools such as Checkstyle.</description>
 
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <inceptionYear>2014</inceptionYear>
+
     <scm>
         <url>https://github.com/nowucca/checkstyle.git</url>
         <connection>scm:git:https://github.com/nowucca/checkstyle.git</connection>
       <tag>HEAD</tag>
-  </scm>
+    </scm>
+
+    <developers>
+        <developer>
+            <name>Steven Atkinson</name>
+            <url>https://github.com/nowucca</url>
+            <organization>Personal</organization>
+            <organizationUrl>http://nowucca.com</organizationUrl>
+        </developer>
+    </developers>
 
     <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <checkstyle.config.location>checkstyle.xml</checkstyle.config.location>
     </properties>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 
 
     <build>
@@ -41,8 +71,6 @@
             </plugins>
         </pluginManagement>
     </build>
-
-
     
 </project>
 
