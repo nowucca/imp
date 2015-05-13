@@ -13,7 +13,6 @@
         IMAP Proxy service
     </description>
 
-    <!--
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -22,7 +21,6 @@
         </license>
     </licenses>
     <inceptionYear>2014</inceptionYear>
-    -->
 
     <scm>
         <url>https://github.com/nowucca/imp.git</url>
@@ -35,7 +33,7 @@
             <name>Steven Atkinson</name>
             <url>https://github.com/nowucca</url>
             <organization>Personal</organization>
-            <organizationUrl>http://steven.atkinson.net</organizationUrl>
+            <organizationUrl>http://nowucca.com</organizationUrl>
         </developer>
     </developers>
 
@@ -44,7 +42,6 @@
         <checkstyle.config.location>checkstyle.xml</checkstyle.config.location>
     </properties>
 
-    <!--
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
@@ -55,7 +52,6 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
-    -->
 
     <modules>
         <module>com.nowucca.imp.util</module>
