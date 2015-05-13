@@ -5,11 +5,16 @@
     <groupId>com.nowucca</groupId>
     <artifactId>checkstyle</artifactId>
     <packaging>jar</packaging>
-    <version>1.0</version>
+    <version>develop-SNAPSHOT</version>
 
     <name>Nowucca Code Quality</name>
     <url>https://github.com/nowucca/checkstyle</url>
-    <description>Configuration for code quality tools such as Checkstyle, FindBugs and PMD.</description>
+    <description>Configuration for code quality tools such as Checkstyle.</description>
+
+    <scm>
+        <url>https://github.com/nowucca/checkstyle.git</url>
+        <connection>scm:git:https://github.com/nowucca/checkstyle.git</connection>
+    </scm>
 
     <properties>
         <maven.compiler.source>1.7</maven.compiler.source>
