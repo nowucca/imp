@@ -10,7 +10,6 @@
     <url>https://github.com/nowucca/checkstyle</url>
     <description>Configuration for code quality tools such as Checkstyle.</description>
 
-
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -23,7 +22,7 @@
     <scm>
         <url>https://github.com/nowucca/checkstyle.git</url>
         <connection>scm:git:https://github.com/nowucca/checkstyle.git</connection>
-      <tag>HEAD</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <developers>
@@ -51,7 +50,6 @@
         </repository>
     </distributionManagement>
 
-
     <build>
         <pluginManagement>
             <plugins>
@@ -73,4 +71,3 @@
     </build>
     
 </project>
-
