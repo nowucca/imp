@@ -4,7 +4,6 @@
 package com.nowucca.imp.core.codec;
 
 import com.nowucca.imp.core.message.command.ImapRequest;
-import io.netty.handler.codec.TooLongFrameException;
 import org.junit.Test;
 import static org.junit.Assert.assertNull;
 
@@ -13,7 +12,7 @@ public class NoopCommandDecoderTest extends BaseDecoderTest {
     @Test
     public void shouldNotProduceResultWithUnterminatedCommandString() throws Exception {
         writeToChannel("A001 NOOP");
-        final ImapRequest imapRequest = (ImapRequest) channel.readInbound();
+        final ImapRequest imapRequest = channel.readInbound();
         assertNull(imapRequest);
     }
 

@@ -41,7 +41,7 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
 
     private static final Charset US_ASCII = Charset.forName("US-ASCII");
 
-    public static enum State {
+    public enum State {
         READ_TAG,
         READ_COMMAND_NAME,
         READ_CRLF,
@@ -362,8 +362,14 @@ public class ImapRequestDecoder extends ReplayingDecoder<ImapRequestDecoder.Stat
         protected Set<Character> terminatingCharacters() {
             return Collections.singleton(' ');
         }
-        protected int maximumSize() { return DEFAULT_MAXIMUM_SIZE; }
-        protected boolean isValidChar(char c) { return true; }
+
+        protected int maximumSize() {
+            return DEFAULT_MAXIMUM_SIZE;
+        }
+
+        protected boolean isValidChar(char c) {
+            return true;
+        }
 
         @Override
         public boolean process(byte value) throws Exception {

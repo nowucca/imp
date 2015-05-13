@@ -34,7 +34,9 @@ public class BaseDecoderTest {
     }
 
     @After
-    public void tearDown() throws Exception { channel.finish(); }
+    public void tearDown() throws Exception {
+        channel.finish();
+    }
 
     protected void assertByteBufsEqual(ByteBuf expected, ByteBuf buffer) {
         Assert.assertTrue(format("Expected bytes '%s'\nreceived:\n               '%s'",

@@ -3,21 +3,13 @@
  */
 package com.nowucca.imp.core.codec;
 
-import com.nowucca.imp.core.message.command.ImapRequest;
-import com.nowucca.imp.core.message.command.InvalidImapRequest;
-import com.nowucca.imp.util.UTF8;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.handler.codec.DecoderResult;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
-import static io.netty.buffer.Unpooled.directBuffer;
 import static java.lang.String.format;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
  */
