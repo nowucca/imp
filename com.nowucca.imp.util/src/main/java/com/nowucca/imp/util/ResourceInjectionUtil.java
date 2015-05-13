@@ -53,11 +53,7 @@ public final class ResourceInjectionUtil {
                     if (resourceType == injectableType) {
                         try {
                             method.invoke(target, injectableInstance);
-                        } catch (IllegalArgumentException e) {
-                            throw new RuntimeException(e);
-                        } catch (IllegalAccessException e) {
-                            throw new RuntimeException(e);
-                        } catch (InvocationTargetException e) {
+                        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
                             throw new RuntimeException(e);
                         }
                     }

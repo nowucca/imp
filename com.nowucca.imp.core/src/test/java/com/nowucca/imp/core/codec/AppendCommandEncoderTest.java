@@ -20,7 +20,7 @@ import org.junit.Test;
 public class AppendCommandEncoderTest extends BaseEncoderTest {
 
     @Test
-    public void shouldEncodeAppendCommand() throws Exception {
+    public void shouldEncodeCommand() throws Exception {
         final String mailboxName = "trash";
         final Flags flags = new Flags("SENT");
         final ZonedDateTime zonedDateTime = ZonedDateTime.of(1972, 5, 11, 0, 50, 3, 0,

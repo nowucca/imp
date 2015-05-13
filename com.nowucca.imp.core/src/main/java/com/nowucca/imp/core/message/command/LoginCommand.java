@@ -28,6 +28,14 @@ public class LoginCommand implements ImapCommand {
         return "LOGIN";
     }
 
+    public CharSequence getUserId() {
+        return userId;
+    }
+
+    public CharSequence getPassword() {
+        return password;
+    }
+
     @Override
     public List<?> getArguments() {
         return Arrays.asList(userId, password);

@@ -20,12 +20,6 @@ public class CapabilityCommandDecoderTest extends BaseDecoderTest {
     }
 
     @Test
-    public void shouldParseTaggedLogoutCommand() throws Exception {
-        writeToChannel("A003 LOGOUT\r\n");
-        expectSuccessfulRequest("A003", "LOGOUT");
-    }
-
-    @Test
     public void shouldParseFragmentedCommandName() throws Exception {
         writeToChannel("A006 CAPA");
         writeToChannel("BILITY\r\n");

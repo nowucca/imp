@@ -10,10 +10,18 @@ import com.nowucca.imp.core.message.command.CapabilityCommand;
 import com.nowucca.imp.core.message.command.ImapCommand;
 import com.nowucca.imp.core.message.command.ImapRequest;
 import com.nowucca.imp.core.message.command.LoginCommand;
+import com.nowucca.imp.core.message.command.LogoutCommand;
+import com.nowucca.imp.core.message.command.NoopCommand;
+import com.nowucca.imp.core.message.command.SelectCommand;
+import com.nowucca.imp.core.message.command.StartTlsCommand;
 import com.nowucca.imp.util.ModifiedUTF7;
+import com.nowucca.imp.util.UTF8;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -79,7 +87,42 @@ public class ImapRequestEncoder extends MessageToByteEncoder<ImapRequest> {
                 case LOGIN: {
                     final LoginCommand loginCommand = (LoginCommand) command;
                     encodeCommandName(out, loginCommand);
+                    encodeSpace(out);
+                    encodeLiteral(string2bytebuf(loginCommand.getUserId()), out);
+                    encodeSpace(out);
+                    encodeLiteral(string2bytebuf(loginCommand.getPassword()), out);
+                    encodeCRLF(out);
+                    break;
+                }
 
+                case LOGOUT: {
+                    final LogoutCommand logoutCommand = (LogoutCommand) command;
+                    encodeCommandName(out, logoutCommand);
+                    encodeCRLF(out);
+                    break;
+                }
+
+                case NOOP: {
+                    final NoopCommand noopCommand = (NoopCommand) command;
+                    encodeCommandName(out, noopCommand);
+                    encodeCRLF(out);
+                    break;
+                }
+
+                case SELECT: {
+                    final SelectCommand selectCommand = (SelectCommand) command;
+                    encodeCommandName(out, selectCommand);
+                    encodeSpace(out);
+                    encodeMailboxName(selectCommand.getMailboxName(), out);
+                    encodeCRLF(out);
+                    break;
+                }
+
+                case STARTTLS: {
+                    final StartTlsCommand startTlsCommand = (StartTlsCommand) command;
+                    encodeCommandName(out, startTlsCommand);
+                    encodeCRLF(out);
+                    break;
                 }
 
                 default: {
@@ -88,6 +131,10 @@ public class ImapRequestEncoder extends MessageToByteEncoder<ImapRequest> {
 
             }
         }
+    }
+
+    private ByteBuf string2bytebuf(CharSequence string) {
+        return ByteBufUtil.encodeString(PooledByteBufAllocator.DEFAULT, CharBuffer.wrap(string), UTF8.charset());
     }
 
     private void encodeAuthenticationMechanismName(ByteBuf out, AuthenticateCommand authenticateCommand) {

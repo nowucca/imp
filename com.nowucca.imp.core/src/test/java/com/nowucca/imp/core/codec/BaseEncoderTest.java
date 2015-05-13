@@ -31,7 +31,7 @@ public class BaseEncoderTest {
     }
 
     protected void assertEquals(ByteBuf expected, ByteBuf actual) {
-        assertTrue(format("Expected bytes '%s'\nreceived:\n               '%s'",
+        assertTrue(format("\nExpected bytes '%s'\nreceived:\n               '%s'",
                         ByteBufUtil.hexDump(expected), ByteBufUtil.hexDump(actual)),
                 ByteBufUtil.equals(expected, actual));
     }
