@@ -5,7 +5,7 @@
     <groupId>com.nowucca</groupId>
     <artifactId>checkstyle</artifactId>
     <packaging>jar</packaging>
-    <version>develop-SNAPSHOT</version>
+    <version>1.0.1-SNAPSHOT</version>
 
     <name>Nowucca Code Quality</name>
     <url>https://github.com/nowucca/checkstyle</url>
